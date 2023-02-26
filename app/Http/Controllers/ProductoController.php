@@ -169,23 +169,19 @@ class ProductoController extends Controller
         //idioma
         $locale = App::currentLocale();
 
+        
+        //array para mapear idiomas y id y asi evitar el switch case
+        $idiomas = [
+            'es' => 1,
+            'ca' => 2,
+            'en' => 3,
+        ];
+
         //esta variable representa la traduccion correcta que se correponde al idoma actual y al producto
         //es obtenida sabiendo el valor de $locale y del productoID, (que a su vez 'producto' es obtenido a partir de unaTraduccion)
-        $traduccion;
-        switch($locale){
-            case 'es':
-                //recuperar la traduccion correspondiente al producto y idioma actual. 
-                $traduccion = TraduccionesProducto::where("idiomaID", 1)->where("productoID", $producto->id)->firstOrFail();
-                break;
-            case 'ca':
-                //recuperar la traduccion correspondiente al producto y idioma actual
-                $traduccion = TraduccionesProducto::where("idiomaID", 2)->where("productoID", $producto->id)->firstOrFail();
-                break;
-            case 'en':
-                //recuperar la traduccion correspondiente al producto y idioma actual
-                $traduccion = TraduccionesProducto::where("idiomaID", 3)->where("productoID", $producto->id)->firstOrFail();
-                break;
-        }
+        $traduccion = TraduccionesProducto::where("idiomaID", $idiomas[$locale])->where("productoID", $producto->id)->firstOrFail();
+
+        
 
         //esto es opcional. Al cambiar el idioma se redirecciona a la ruta con el slug correspondiente al idioma seleccionado
         //no es necesario, se puede eliminar, pero queda bien ir actualizando la ruta de modo que el slug se muestre acorde al idioma.
