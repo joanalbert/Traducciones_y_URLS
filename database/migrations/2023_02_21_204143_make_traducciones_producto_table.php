@@ -22,6 +22,7 @@ return new class extends Migration
             $table->integer('productoID')->unsigned();
             $table->integer('idiomaID')->unsigned();
             $table->string('slug', 150)->unique();
+            
             $table->timestamps();
 
             $table->foreign('productoID')->references('id')->on('Producto')

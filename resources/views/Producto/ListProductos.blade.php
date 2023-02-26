@@ -17,16 +17,9 @@
                     <p>{{$traducciones[$key]['subnombre']}}</p>
                     <p>{{$traducciones[$key]['descripcion']}}</p>
 
-                    <p>slug: {{$traducciones[$key]['slug']}}</p>
+                    <p>slug: {{ $traducciones[$key]['slug'] }}</p>
                     
-                    <a href="{{ route('Producto.show_slug', ['slug'=>$traducciones[$key]['slug'] ]) }}" class="btn btn-primary">Ver producto (slug)</a>
-
-                    <a href="{{ route('Producto.show_slug_id', [
-                                                                'slug'=>$traducciones[$key]['slug'],
-                                                                'productoID'=> $product->id
-                                                                ]
-                                     )
-                             }}" class="btn btn-primary">Ver producto (slug y id)</a>
+                    <a href="{{ route('product_show_by_slug', ['slug'=> $traducciones[$key]['slug'] ]) }}" class="btn btn-primary">Ver producto (slug)</a>
                 </li>
                 @endforeach
             </ul>

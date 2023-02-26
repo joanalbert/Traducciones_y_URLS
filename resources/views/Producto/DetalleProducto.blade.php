@@ -11,11 +11,6 @@
 
                 <br>
 
-                <label for="slug">Slug</label>
-                <input id="slug" type="text" value="{{$traduccion->slug}}" readonly>
-
-                <br>
-
                 <label for="desc">Descripcion</label>
                 <textarea id="desc" cols="30" rows="10" readonly>{{$traduccion->descripcion}}</textarea>
 

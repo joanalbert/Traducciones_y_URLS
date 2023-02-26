@@ -9,10 +9,13 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 
+
 class TraduccionesProducto extends Model
 {
     use HasFactory;
     use hasSlug; // <- 2.- hacer uso de hasSlug, esto es llamado un 'trait' es parecido a implementar una interface llamada hasSlug
+
+    
 
     protected $table = "TraduccionesProducto";
     protected $fillable = [
@@ -21,7 +24,7 @@ class TraduccionesProducto extends Model
         'descripcion',
         'productoID',
         'idiomaID',
-        'slug' // <- 3.- actualizar fillable con el nuevo campo 'slug'
+        'slug' // 3.- añadir el nuevo campo slug en fillable
     ];
 
     //4.- definir una configuracion para sluggable

@@ -94,7 +94,7 @@ class ProductoController extends Controller
         $prod->precio = $_POST['precio'];
         $prod->stock = $_POST['stock'];
         $prod->referencia = $_POST['referencia'];
-
+        
 
         //campos traduccion es
         $tradES = new TraduccionesProducto();
@@ -152,51 +152,53 @@ class ProductoController extends Controller
 
 
     
-
     //metodo personalizado se 'show' sin productoID
     public function show_by_slug($slug){
-        //slug es unico en la tabla traducciones, asi que lo podemos utilizar para recuperar una unica traduccion para este producto, pero no todas, lo cual de carga la traduccion dinamica
-        $traduccion = TraduccionesProducto::where("slug", $slug)->firstOrFail();
-        //a partir de la traduccion, recuperamos el producto
-        $producto   = Producto::where("id", $traduccion->productoID)->firstOrFail();
-        
-        return view('Producto.DetalleProducto', compact('producto'), compact('traduccion'));
-    }
 
-    //metodo personalizado se 'show' con productoID
-    public function show_by_slug_id($slug, $productoID){
+        //una traduccion, la que corresponde al slug de la ruta
+        //es "una traduccion" y no la traduccion porque el usuario puede haver cambiado el idioma mientras tenia la pagina
+        //de detalle abierta, por eso se "recalcula" la traduccion más abajo. Aun asi es necesario tener esta variable para poder
+        //recuperar el producto, y mas abajo se explica porque el producto es necesario
+        $unaTraduccion = TraduccionesProducto::where("slug", $slug)->firstOrFail();
 
+        //necesitamos tambien recuperar el producto asociado a la traduccion, 2 motivos
+        // 1.- lo tiene que mostrar la vista
+        // 2.- necesitamos saber su id para recuperar la traduccion correcta mas abajo (id producto y id idioma)
+        $producto = Producto::where("id", $unaTraduccion->productoID)->firstOrFail(); //first or fail es como first, pero si el resultado es null lanza un error 404 not found, asi no tenemos que preocuparnos de ir mirando si las variables son null o no antes de llamar funciones sobre ellas o acceder a propiedades
+
+        //idioma
         $locale = App::currentLocale();
-        $producto = Producto::where("id", $productoID)->firstOrFail(); //firstOrFail es como first, pero se asegura de que el resultado no sea null, si es null muestra pagina de 404 not found. Nos es mas conveniente que el first porque no tenemos que ir asegurandonos que las variables no sean null antes de acceder a algunn campo
-        $traduccion;
 
-        //dependiendo del locale, recuperamos la traduccion asociada al productoID de la ruta
+        //esta variable representa la traduccion correcta que se correponde al idoma actual y al producto
+        //es obtenida sabiendo el valor de $locale y del productoID, (que a su vez 'producto' es obtenido a partir de unaTraduccion)
+        $traduccion;
         switch($locale){
             case 'es':
-                $traduccion = TraduccionesProducto::where("idiomaID", 1)->where("productoID", $productoID)->firstOrFail();
+                //recuperar la traduccion correspondiente al producto y idioma actual. 
+                $traduccion = TraduccionesProducto::where("idiomaID", 1)->where("productoID", $producto->id)->firstOrFail();
                 break;
             case 'ca':
-                $traduccion = TraduccionesProducto::where("idiomaID", 2)->where("productoID", $productoID)->firstOrFail();
+                //recuperar la traduccion correspondiente al producto y idioma actual
+                $traduccion = TraduccionesProducto::where("idiomaID", 2)->where("productoID", $producto->id)->firstOrFail();
                 break;
             case 'en':
-                $traduccion = TraduccionesProducto::where("idiomaID", 3)->where("productoID", $productoID)->firstOrFail();
+                //recuperar la traduccion correspondiente al producto y idioma actual
+                $traduccion = TraduccionesProducto::where("idiomaID", 3)->where("productoID", $producto->id)->firstOrFail();
                 break;
         }
 
-        //si el slug de la traduccion no es el mismo que el de la ruta, significa que hemos cambiado de idioma y devemos redireccionar a la ruta 
-        //con el slug correcto. Esto no es necesario, se puede eliminar y no pasa nada. Pero queda mejor actualizar el slug de la url cada vez que 
-        //cambiamos de idioma para mantenerlo tambien en el idioma correcto.
-        if($traduccion->slug != $slug)
-        {
-            return redirect()->route("Producto.show_slug_id", ['slug'=>$traduccion->slug, 'productoID'=>$producto->id]);
+        //esto es opcional. Al cambiar el idioma se redirecciona a la ruta con el slug correspondiente al idioma seleccionado
+        //no es necesario, se puede eliminar, pero queda bien ir actualizando la ruta de modo que el slug se muestre acorde al idioma.
+        //al hacer una redireccion de nota un poco, si no gusta el efecto se elimina o se comenta el condicional
+        if($traduccion->slug != $slug){
+            return redirect()->route("product_show_by_slug", ['slug' => $traduccion->slug]);
         }
 
-        //devolvemos la vista
-        return view('Producto.DetalleProducto', compact('producto'), compact('traduccion'));
+        //mostrar vista con los datos que corresponde
+        return view("Producto.DetalleProducto", compact("producto"), compact("traduccion"));
     }
-    
 
-    
+      
 
     /**
      * Show the form for editing the specified resource.
