@@ -150,6 +150,70 @@ class ProductoController extends Controller
         //
     }
 
+    //En esta funcion hay codigo que hace lo mismo que 'show_by_slug' de más abajo
+    //pero aqui estoy investigando una cosa de laravel llamada 'eager loading' que, al parecer, permite reducir mucho las peticiones
+    //a la base de datos, mejorando asi el rendimineto de la web sobretodo si existen muchos productos con muchas traducciones
+    //se supone que representa una mejora considerable en cuanto a rendimiento respecto a al codigo de 'show_by_slug'.
+    //Pero como todavia no comprendo al 100% eager loading, aqui dejo un comentario descriptivo del codigo segun chat gpt :
+    //
+    //
+    /*
+    Este código utiliza eager loading para cargar un producto y sus traducciones relacionadas utilizando una sola consulta a la base de datos.
+    A continuación, se describe paso a paso lo que hace el código:
+
+    -Obtener el idioma actual a través del helper de Laravel App::currentLocale().
+    -Crear un array $idiomas para mapear los códigos de idioma con sus IDs en la base de datos.
+     Esto se hace para evitar usar una estructura condicional como un switch case.
+    -Recuperar la traducción correspondiente al slug de la ruta utilizando el modelo TraduccionesProducto.
+    -Cargar el producto asociado utilizando eager loading a través del método with('traducciones') en el modelo Producto.
+     Esto cargará el producto y todas sus traducciones relacionadas utilizando una sola consulta a la base de datos.
+    -Obtener la traducción correspondiente al idioma actual a través del atributo traducciones del modelo Producto.
+     La propiedad traducciones contiene una colección de todas las traducciones asociadas con el producto cargado anteriormente.
+    -Si la traducción no se encuentra en la colección obtenida anteriormente, se lanza un error 404.
+    -Si la traducción se encuentra pero su slug no coincide con el de la ruta, se redirige a la ruta correspondiente al slug de la traducción.
+    -Mostrar la vista Producto.DetalleProducto con los datos correspondientes al producto y la traducción.
+
+    En resumen, este código utiliza eager loading para reducir el número de consultas a la base de datos necesarias para
+    cargar un producto y sus traducciones asociadas, lo que puede mejorar significativamente el rendimiento de la aplicación en
+    comparación con la carga lenta de traducciones a través de relaciones de modelo convencionales.*/    
+    public function eagerLoading($slug)
+    {
+        //idioma
+        $locale = App::currentLocale();
+
+        //array para mapear idiomas y id y asi evitar el switch case
+        $idiomas = [
+            'es' => 1,
+            'ca' => 2,
+            'en' => 3,
+        ];
+
+        // Recuperar la traducción correspondiente al slug de la ruta
+        $unaTraduccion = TraduccionesProducto::where("slug", $slug)->firstOrFail();
+
+        // Cargar el producto asociado con sus traducciones utilizando eager loading
+        $producto = Producto::with('traducciones')
+            ->where("id", $unaTraduccion->productoID)
+            ->firstOrFail();
+
+        // Obtener la traducción correspondiente al idioma actual
+        $traduccion = $producto->traducciones
+            ->where('idiomaID', $idiomas[$locale])
+            ->first();
+
+        // Si la traducción no se encuentra, lanzar un error 404
+        if (!$traduccion) {
+            abort(404);
+        }
+
+        // Redirigir a la ruta con el slug correspondiente al idioma seleccionado si es necesario
+        if($traduccion->slug != $slug){
+            return redirect()->route("product_show_by_slug", ['slug' => $traduccion->slug]);
+        }
+
+        // Mostrar la vista con los datos que corresponden
+        return view("Producto.DetalleProducto", compact("producto"), compact("traduccion"));
+    }
 
     
     //metodo personalizado se 'show' sin productoID

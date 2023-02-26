@@ -26,7 +26,7 @@ Route::get('/', function () {
 //resource de producto
 Route::resource('Producto', ProductoController::class); 
 //ruta para hacer show de producto con la ruta amigable (slug)
-Route::get('producto/{slug}', [ProductoController::class, 'show_by_slug'])->name('product_show_by_slug'); 
+Route::get('producto/{slug}', [ProductoController::class, 'eagerLoading'])->name('product_show_by_slug'); 
 
 
 

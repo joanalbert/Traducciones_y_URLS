@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-
+use App\Models\TraduccionesProducto;
 
 class Producto extends Model
 {
@@ -21,5 +21,10 @@ class Producto extends Model
         'nombre_base'
     ];
 
-    
+    //definir una relacion de modelos llamada "traducciones" 
+    public function traducciones()
+    {
+        //un Producto tiene muchas TraduccionesProducto 
+        return $this->hasMany(TraduccionesProducto::class, 'productoID');
+    }
 }
